@@ -81,8 +81,8 @@ def classify_batch_concrete_nouns(words, max_retries=3):
 
     # Two prompts: normal → strict
     prompts = [
-        f"""Classify each word/phrase into one of three categories: CONCRETE, ABSTRACT, or NON-NOUN.
-
+        f"""Classify each word/phrase into one of three categories: CONCRETE, ABSTRACT, or NON-NOUN. in the SAME order and dont try to do any cleaning or splitting of the input words. You must classify them exactly as they are. DONT return more entries than you were given, even if one entry contains muliple words.
+        
 CONCRETE: Physical objects you can perceive with your senses (see, touch, smell, taste, hear)
 Examples: dog, table, water, car, book, phone, building, apple
 
@@ -103,7 +103,7 @@ Respond ONLY with a JSON array. Format:
 ]
 
 Return exactly {n} words in the exact order given. No explanations, just the JSON array.""",
-        f"""You MUST return a JSON array with EXACTLY {n} elements, one per word below, in the SAME order.
+        f"""You MUST return a JSON array with EXACTLY {n} elements, one per word below, in the SAME order and dont try to do any cleaning or splitting of the input words. You must classify them exactly as they are.
 
 Words:
 {word_list}
