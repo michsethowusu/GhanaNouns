@@ -31,7 +31,7 @@ import os
 MISTRAL_API_KEY = "your_mistral_api_key_here"  # ← put key here
 client = OpenAI(base_url="https://api.mistral.ai/v1", api_key=MISTRAL_API_KEY)
 MODEL = "mistral-large-latest"
-BATCH_SIZE = 100  # keep as you wish
+BATCH_SIZE = 200  # this level to improve recall, but you can experiment with higher numbers
 RESUME_STATE_FILE = "classification_resume_state.json"
 
 # -----------------------------------------------------------
