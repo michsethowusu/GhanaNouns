@@ -4,6 +4,8 @@ import json
 from tqdm import tqdm
 import time
 from collections import defaultdict
+import os
+import pickle
 
 # Mistral API Configuration
 MISTRAL_API_KEY = "your_mistral_api_key_here"  # Replace with your Mistral API key
@@ -16,6 +18,53 @@ client = OpenAI(
 
 MODEL = "mistral-large-latest"  # Using Mistral Large model
 BATCH_SIZE = 100  # Process 100 words per request
+
+# Resume functionality
+RESUME_STATE_FILE = 'classification_resume_state.pkl'
+PROGRESS_FILE = 'classification_progress.csv'
+
+def save_resume_state(processed_words, word_classifications, current_batch, total_batches, input_file, output_file, text_column):
+    """Save the current state for resume capability"""
+    state = {
+        'processed_words': processed_words,
+        'word_classifications': word_classifications,
+        'current_batch': current_batch,
+        'total_batches': total_batches,
+        'input_file': input_file,
+        'output_file': output_file,
+        'text_column': text_column,
+        'timestamp': time.time()
+    }
+    with open(RESUME_STATE_FILE, 'wb') as f:
+        pickle.dump(state, f)
+    print(f"  💾 Saved resume state (batch {current_batch}/{total_batches})")
+
+def load_resume_state():
+    """Load the saved state if it exists"""
+    if os.path.exists(RESUME_STATE_FILE):
+        try:
+            with open(RESUME_STATE_FILE, 'rb') as f:
+                state = pickle.load(f)
+            print(f"  📂 Found resume state from batch {state['current_batch']}/{state['total_batches']}")
+            return state
+        except Exception as e:
+            print(f"  ⚠️  Error loading resume state: {e}")
+            return None
+    return None
+
+def clear_resume_state():
+    """Clear the resume state files"""
+    if os.path.exists(RESUME_STATE_FILE):
+        os.remove(RESUME_STATE_FILE)
+    if os.path.exists(PROGRESS_FILE):
+        os.remove(PROGRESS_FILE)
+    print("  🗑️  Cleared resume state")
+
+def save_progress_df(df, output_file):
+    """Save intermediate progress to CSV"""
+    progress_file = output_file.replace('.csv', '_progress.csv')
+    df.to_csv(progress_file, index=False)
+    return progress_file
 
 def classify_batch_concrete_nouns(words):
     """
@@ -114,61 +163,6 @@ Return all {len(words)} words in the exact order given. No explanations, just th
         print(f"  Traceback: {traceback.format_exc()}")
         return None
 
-def classify_batch_with_thinking(words):
-    """
-    Alternative version that uses streaming with reasoning.
-    Useful for debugging or understanding model's reasoning.
-    Now includes NON-NOUN classification.
-    """
-    
-    word_list = "\n".join([f"{i+1}. {word}" for i, word in enumerate(words)])
-    
-    prompt = f"""Classify each word/phrase into one of three categories: CONCRETE, ABSTRACT, or NON-NOUN.
-
-CONCRETE: Physical objects you can perceive with senses
-ABSTRACT: Concepts, ideas, emotions you cannot physically perceive  
-NON-NOUN: Words that are not nouns (verbs, adjectives, adverbs, etc.)
-
-Words: {word_list}
-
-Respond with JSON array: [{{"word": "x", "label": "CONCRETE/ABSTRACT/NON-NOUN"}}, ...]"""
-
-    try:
-        completion = client.chat.completions.create(
-            model=MODEL,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.1,
-            top_p=0.95,
-            max_tokens=len(words) * 45,
-            stream=True
-        )
-        
-        content_parts = []
-        
-        for chunk in completion:
-            if chunk.choices[0].delta.content is not None:
-                content_parts.append(chunk.choices[0].delta.content)
-        
-        content = "".join(content_parts).strip()
-        
-        # Parse JSON
-        if '```json' in content:
-            content = content.split('```json')[1].split('```')[0].strip()
-        elif '```' in content:
-            content = content.split('```')[1].split('```')[0].strip()
-        
-        start_idx = content.find('[')
-        end_idx = content.rfind(']') + 1
-        if start_idx != -1 and end_idx != 0:
-            content = content[start_idx:end_idx]
-        
-        classifications = json.loads(content)
-        return classifications
-        
-    except Exception as e:
-        print(f"  ✗ Error: {e}")
-        return None
-
 def get_unique_words_with_mapping(df, text_column):
     """
     Extract unique words from dataframe and create mapping.
@@ -191,7 +185,7 @@ def get_unique_words_with_mapping(df, text_column):
     
     return unique_words, word_to_indices
 
-def process_csv_in_batches(input_file, output_file, text_column='text', use_thinking=False, filter_non_nouns=True):
+def process_csv_in_batches(input_file, output_file, text_column='text', use_thinking=False, filter_non_nouns=True, resume=True):
     """
     Process CSV file in batches of 100 unique words using Mistral.
     
@@ -201,6 +195,7 @@ def process_csv_in_batches(input_file, output_file, text_column='text', use_thin
         text_column: Name of column containing words to classify
         use_thinking: If True, uses streaming with reasoning enabled (slower but shows reasoning)
         filter_non_nouns: If True, excludes NON-NOUN words from the final output
+        resume: If True, attempts to resume from previous run if available
     """
     print(f"Loading {input_file}...")
     df = pd.read_csv(input_file)
@@ -210,55 +205,117 @@ def process_csv_in_batches(input_file, output_file, text_column='text', use_thin
     print(f"Model: {MODEL}")
     print(f"Thinking mode: {'Enabled' if use_thinking else 'Disabled (faster)'}")
     print(f"Filter non-nouns: {'Yes' if filter_non_nouns else 'No'}")
+    print(f"Resume enabled: {'Yes' if resume else 'No'}")
     print(f"{'='*60}\n")
     
     # Get unique words and mapping
     unique_words, word_to_indices = get_unique_words_with_mapping(df, text_column)
     
-    # Store classifications for unique words
-    word_classifications = {}
+    # Check for resume state
+    resume_state = None
+    if resume:
+        resume_state = load_resume_state()
+        if resume_state and resume_state.get('input_file') == input_file and resume_state.get('output_file') == output_file:
+            print("🔄 Resuming from previous run...")
+            word_classifications = resume_state['word_classifications']
+            start_batch = resume_state['current_batch']
+            total_batches = resume_state['total_batches']
+            
+            # Verify the words match
+            if set(word_classifications.keys()).issubset(set(unique_words)):
+                print(f"  ✓ Resume state validated")
+                print(f"  📊 Previously processed: {len(word_classifications)} words")
+                print(f"  🎯 Remaining: {len(unique_words) - len(word_classifications)} words")
+            else:
+                print("  ⚠️  Word mismatch, starting fresh")
+                resume_state = None
+                word_classifications = {}
+                start_batch = 0
+        else:
+            print("  🆕 No valid resume state found, starting fresh")
+            word_classifications = {}
+            start_batch = 0
+    else:
+        word_classifications = {}
+        start_batch = 0
+    
+    # Calculate total batches
+    total_batches = (len(unique_words) + BATCH_SIZE - 1) // BATCH_SIZE
     
     # Process unique words in batches of 100
-    total_batches = (len(unique_words) + BATCH_SIZE - 1) // BATCH_SIZE
     print(f"\nProcessing {len(unique_words)} unique words in {total_batches} batches of {BATCH_SIZE}...\n")
     
     successful_batches = 0
     failed_batches = 0
     
-    classify_func = classify_batch_with_thinking if use_thinking else classify_batch_concrete_nouns
+    # Skip already processed batches if resuming
+    if resume_state and start_batch > 0:
+        successful_batches = start_batch - 1
+        print(f"  ⏩ Skipping first {successful_batches} already processed batches")
     
-    for i in tqdm(range(0, len(unique_words), BATCH_SIZE), desc="Processing"):
-        batch = unique_words[i:i+BATCH_SIZE]
-        batch_num = i//BATCH_SIZE + 1
-        
-        print(f"\n[Batch {batch_num}/{total_batches}] Processing {len(batch)} words...")
-        
-        # Classify batch
-        classifications = classify_func(batch)
-        
-        if classifications and isinstance(classifications, list):
-            # Store classifications
-            classified_count = 0
-            for classification in classifications:
-                if isinstance(classification, dict) and 'word' in classification and 'label' in classification:
-                    word = classification['word']
-                    label = classification['label']
-                    word_classifications[word] = label
-                    classified_count += 1
+    classify_func = classify_batch_concrete_nouns
+    
+    try:
+        for i in tqdm(range(start_batch * BATCH_SIZE, len(unique_words), BATCH_SIZE), desc="Processing", initial=start_batch, total=total_batches):
+            batch = unique_words[i:i+BATCH_SIZE]
+            batch_num = i//BATCH_SIZE + 1
             
-            print(f"  ✓ Successfully classified {classified_count}/{len(batch)} words")
-            successful_batches += 1
-        else:
-            print(f"  ✗ Failed to classify batch {batch_num}")
-            failed_batches += 1
-            # Mark failed words as UNKNOWN
-            for word in batch:
-                if word not in word_classifications:
-                    word_classifications[word] = 'UNKNOWN'
+            # Skip if already processed (for resume)
+            if all(word in word_classifications for word in batch):
+                print(f"\n[Batch {batch_num}/{total_batches}] Already processed, skipping...")
+                continue
+                
+            print(f"\n[Batch {batch_num}/{total_batches}] Processing {len(batch)} words...")
+            
+            # Classify batch
+            classifications = classify_func(batch)
+            
+            if classifications and isinstance(classifications, list):
+                # Store classifications
+                classified_count = 0
+                for classification in classifications:
+                    if isinstance(classification, dict) and 'word' in classification and 'label' in classification:
+                        word = classification['word']
+                        label = classification['label']
+                        word_classifications[word] = label
+                        classified_count += 1
+                
+                print(f"  ✓ Successfully classified {classified_count}/{len(batch)} words")
+                successful_batches += 1
+                
+                # Save progress every 5 batches or at significant milestones
+                if batch_num % 5 == 0 or batch_num == total_batches:
+                    save_resume_state(set(word_classifications.keys()), word_classifications, batch_num, total_batches, input_file, output_file, text_column)
+                    
+            else:
+                print(f"  ✗ Failed to classify batch {batch_num}")
+                failed_batches += 1
+                # Mark failed words as UNKNOWN
+                for word in batch:
+                    if word not in word_classifications:
+                        word_classifications[word] = 'UNKNOWN'
+            
+            # Rate limiting
+            if i + BATCH_SIZE < len(unique_words):
+                time.sleep(1.0)  # Wait between batches
         
-        # Rate limiting
-        if i + BATCH_SIZE < len(unique_words):
-            time.sleep(1.0)  # Wait between batches
+        # Clear resume state on successful completion
+        if resume:
+            clear_resume_state()
+            print("  ✅ Processing completed successfully - resume state cleared")
+        
+    except KeyboardInterrupt:
+        print(f"\n\n⚠️  Process interrupted by user!")
+        print(f"  💾 Saving progress before exit...")
+        save_resume_state(set(word_classifications.keys()), word_classifications, (i//BATCH_SIZE) + 1, total_batches, input_file, output_file, text_column)
+        print(f"  🔄 Run the script again to resume from batch {(i//BATCH_SIZE) + 1}")
+        return None, None
+    except Exception as e:
+        print(f"\n\n❌ Error during processing: {e}")
+        print(f"  💾 Saving progress before exit...")
+        save_resume_state(set(word_classifications.keys()), word_classifications, (i//BATCH_SIZE) + 1, total_batches, input_file, output_file, text_column)
+        print(f"  🔄 Run the script again to resume from batch {(i//BATCH_SIZE) + 1}")
+        return None, None
     
     # Apply classifications to all rows
     print(f"\n{'='*60}")
@@ -388,7 +445,7 @@ def test_api_connection():
     else:
         print("\n✗ API connection failed")
         print("\nTroubleshooting:")
-        print("1. Verify your API key at: https://console.mistral.ai/ ")
+        print("1. Verify your API key at: https://console.mistral.ai/  ")
         print("2. Make sure you have access to Mistral Large")
         print("3. Check your internet connection")
         print("4. Try: pip install --upgrade openai")
@@ -401,7 +458,7 @@ if __name__ == "__main__":
         print("⚠️  MISTRAL API KEY REQUIRED")
         print("="*60)
         print("\nSteps to get your API key:")
-        print("1. Go to: https://console.mistral.ai/ ")
+        print("1. Go to: https://console.mistral.ai/  ")
         print("2. Sign up or log in")
         print("3. Navigate to API Keys section")
         print("4. Generate a new API key")
@@ -420,10 +477,12 @@ if __name__ == "__main__":
             # Set use_thinking=True to see model's reasoning (slower)
             # Set use_thinking=False for faster processing (recommended)
             # Set filter_non_nouns=False to keep abstract nouns, True to exclude them
+            # Set resume=False to disable resume functionality
             concrete_df, full_df = process_csv_in_batches(
-                input_file='all_nouns.csv',
+                input_file='eng-twi.csv',
                 output_file='concrete_nouns_only.csv',
                 text_column='text',  # Change to match your column name
                 use_thinking=False,  # Set to True to see reasoning
-                filter_non_nouns=True  # Set to False to keep abstract nouns
+                filter_non_nouns=True,  # Set to False to keep abstract nouns
+                resume=True  # Set to False to start fresh
             )
