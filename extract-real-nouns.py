@@ -1,3 +1,25 @@
+# ------------------------------------------------------------
+# Auto-install missing requirements
+# ------------------------------------------------------------
+import sys, subprocess, importlib
+
+pkgs = {
+    "pandas": "pandas>=1.5.0",
+    "openai": "openai>=1.0.0",
+    "tqdm": "tqdm>=4.64.0"
+}
+
+for import_name, pip_spec in pkgs.items():
+    try:
+        importlib.import_module(import_name)
+    except ImportError:
+        print(f"📦 {import_name} not found → installing {pip_spec} ...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", pip_spec])
+
+# ------------------------------------------------------------
+# Extraction code
+# ------------------------------------------------------------
+
 import pandas as pd
 from openai import OpenAI
 import json
