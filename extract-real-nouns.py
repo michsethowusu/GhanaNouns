@@ -38,7 +38,7 @@ client = OpenAI(
 )
 
 MODEL = "mistral-large-latest"  # Using Mistral Large model
-BATCH_SIZE = 200  # Increased batch size to 200
+BATCH_SIZE = 100  
 
 # Resume functionality
 RESUME_STATE_FILE = 'classification_resume_state.json'
