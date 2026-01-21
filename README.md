@@ -4,11 +4,9 @@ This repository contains a curated dataset of nouns extracted from over 2 millio
 
 ## Overview
 
-In low-resource language contexts, nouns are essential for clear communication but standard Machine Translation models are yet to catchup with accurate translation for these diverse and yet important part of speech. 
+In low-resource language contexts, nouns are essential for clear communication, but standard Machine Translation models have yet to catch up with accurate translations for this diverse and important part of speech.
 
-By providing this dataset, our goal is to establish a baseline that can be used to collect accurate translations of vocabulary used in the Ghanaian context.
-
- 
+By providing this dataset, our goal is to establish a baseline that can be used to collect accurate translations of vocabulary specifically relevant to the Ghanaian context.
 
 ## Methodology
 
@@ -18,28 +16,43 @@ The dataset was produced through a multi-stage pipeline:
 2. **LLM Refinement:** Because rule-based POS tagging can be imprecise, we used the Mistral AI API to verify and filter the list.
 3. **Cleaning:** The final set was filtered to exclude abstract concepts, keeping only common concrete nouns.
 4. **Frequency Analysis:** Nouns were mapped against their original occurrence counts to determine their relevance.
+5. **Machine Translation:** Translations into various Ghanaian languages were generated using Google Gemini 3 Flash.
 
 ## Dataset Structure
 
-The output is provided in multiple CSV files, categorized by their minimum frequency of appearance. This allows users to choose between a broad vocabulary or a highly-vetted "core" terminology list.
+The dataset has been reorganized to provide a single source of truth for frequencies and individual translation files for a wide array of Ghanaian languages.
 
-| File                | Threshold         | Usage Case                                          |
-| ------------------- | ----------------- | --------------------------------------------------- |
-| `nouns_all.csv`   | ≥ 1 occurrence    | Comprehensive vocabulary for research.              |
-| `nouns_min_2.csv`  | ≥ 2 occurrences  | Standard common nouns for general NLP tasks.        |
-| `nouns_min_5.csv`  | ≥ 5 occurrences  | High-confidence terminology for MT anchoring.       |
-| `nouns_min_10.csv` | ≥ 10 occurrences | Core concrete nouns essential for every dictionary. |
+### 1. Master Frequency List
 
-### CSV Format
+- **File:** `nouns_master_list.csv`
+- **Description:** A comprehensive file containing all verified nouns along with their frequency counts from the 2-million-word corpus. This allows researchers to filter the data based on their own custom thresholds.
+- **Columns:**
+  - `noun`: The cleaned concrete noun (English).
+  - `frequency`: Total number of occurrences.
 
-Each file contains the following columns:
+### 2. Language-Specific Lists
 
-- `noun`: The cleaned concrete noun (English).
-- `frequency`: Total number of occurrences in the original 2-million-word corpus.
+We provide individual noun lists for the following Ghanaian languages to facilitate human evaluation and other NLP use cases.
+
+**Note on Translation Quality:** The quality of these translations may differ significantly based on the specific language. For detailed information on the estimated overall accuracy for each language, please refer to the results from the [Nsanku Project](https://github.com/GhanaNLP/nsanku?tab=readme-ov-file#language-specific-results).
+
+|                  |          |                  |                  |
+| ---------------- | -------- | ---------------- | ---------------- |
+| Abron            | Gikyode  | Dangme           | Siwu             |
+| Anyin            | Avatime  | Bisa             | Bimoba           |
+| Southern Birifor | Tuwuli   | Ntcham           | Buli             |
+| Anufo            | Dagbani  | Southern Dagaare | Ewe              |
+| Fante            | Ga       | Gonja            | Farefare         |
+| Hanga            | Konni    | Kusaal           | Lelemi           |
+| Sekpele          | Mampruli | Deg              | Nawuri           |
+| Chumburung       | Nkonya   | Delo             | Nyagbo           |
+| Nzema            | Esahie   | Paasaal          | Tumulung Sisaala |
+| Selee            | Tafi     | Tampulma         | Twi              |
+| Vagla            | Konkomba | Kasem            |                  |
 
 ## Contributors
 
-This project was a collaborative effort. We would like to thank the following volunteers who dedicated their time in creating the dataset:
+This project was a collaborative effort. We would like to thank the following volunteers who dedicated their time to creating the dataset:
 
 1. [Jonathan Ato Markin](https://www.linkedin.com/in/atomarkin/)
 2. [Emmanuel Saah](https://www.linkedin.com/in/emmanuel-saah/)
@@ -50,7 +63,7 @@ This project was a collaborative effort. We would like to thank the following vo
 
 ## Acknowledgments
 
-This project was made possible by the volunteers of Ghana NLP who contributed their time and compute resources to process the 2-million-word dataset using the Mistral API. We also thank the developers of Mistral for building a great model and making their API accessible to developers in Africa. 
+This project was made possible by the volunteers of Ghana NLP who contributed their time and compute resources to process the 2-million-word dataset using the Mistral API. We also thank the developers of Mistral for building a great model and making their API accessible to developers in Africa.
 
 ## About Ghana NLP
 
