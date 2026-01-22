@@ -1,4 +1,4 @@
-# GhanaNouns: A Large-Scale Dataset of Ghanaian Nouns
+# GhanaNouns: Multilingual Dataset of Ghanaian Nouns
 
 This repository contains a curated dataset of nouns extracted from over 2 million words and phrases found in Ghanaian news articles. This resource is provided by Ghana NLP to improve the quality of Machine Translation for vocabulary used in the Ghanaian context.
 
