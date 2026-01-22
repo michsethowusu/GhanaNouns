@@ -38,7 +38,7 @@ We provide individual noun lists for various Ghanaian languages to facilitate hu
 
 | Language | Status        |
 | -------- | ------------- |
-| Twi  | Available   |
+| Twi  | Coming Soon  |
 | Abron    | Coming Soon |
 | Dangme   | Coming Soon |
 | Dagbani  | Coming Soon |
