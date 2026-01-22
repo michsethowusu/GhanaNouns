@@ -52,7 +52,7 @@ We provide individual noun lists for various Ghanaian languages to facilitate hu
 
 ## Contributors
 
-This project was a collaborative effort. We would like to thank the following volunteers who dedicated their time to creating the dataset:
+This project is a collaborative effort. We would like to thank the following volunteers who dedicated their time to creating the dataset:
 
 1. [Jonathan Ato Markin](https://www.linkedin.com/in/atomarkin/)
 2. [Emmanuel Saah](https://www.linkedin.com/in/emmanuel-saah/)
