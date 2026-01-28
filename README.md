@@ -2,19 +2,24 @@
 
 This is an onoing project to create a dataset of nouns in the Ghanaian context and translate them to Ghanaian languages using Large Language Models that have strong performance for Ghanaian languages.
 
-## Methodology
-
-The dataset was produced using these steps:
-
-1. 2 million potential nouns were identified from Ghanaian news archives using spaCy.
-2. Because rule-based POS tagging can be imprecise, we used the Mistral AI API to verify and filter the list.
-3. The final set was filtered to exclude abstract concepts, keeping only common concrete nouns.
-4. Nouns were mapped against their original occurrence counts to determine their relevance.
-5. Translations into various Ghanaian languages were generated using Google Gemini.
-
 ## Dataset Structure
 
-The dataset has been reorganized to provide a single source of truth for frequencies and individual translation files for a wide array of Ghanaian languages.
+The dataset is stored as a CSV file. Each row represents an English noun or noun phrase translated under a specific domain. Translations into Ghanaian languages are added incrementally as they become available.
+
+### Columns
+
+- **`text`** – English noun or noun phrase
+- **`domain`** – Translation context (e.g. `general`, `agric`)
+- **`translation_<lang>`** – Translation in a Ghanaian language, where `<lang>` is the 3-letter ISO language code. These columns are added as new translations become available.
+
+### Example
+
+| text   | domain  | translation_twi | translation_ewe |
+| ------ | ------- | --------------- | --------------- |
+| bank   | general | sikakorabea     | gaƒoƒo          |
+| bank   | agric   | nsu ho asase    | tɔdziƒe         |
+| maize  | agric   | aburo           | bli             |
+| market | general | adwumam         | asi             |
 
 ## Dataset Status
 
