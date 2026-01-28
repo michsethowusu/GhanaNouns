@@ -1,6 +1,6 @@
 # GhanaNouns: Multilingual Dataset of Ghanaian Nouns
 
-This is an onoing project to create a dataset of nouns that are relevant to the Ghanaian context and translate them to Ghanaian languages using Large Language Models that have strong performance for Ghanaian languages.
+This is an onoing project to create a dataset of nouns that are relevant to the Ghanaian context and translate them to Ghanaian languages using Large Language Models that have strong performance for Ghanaian languages. There are currently 875,476 nouns that have been extracted from various sources and translated to languages [specified below](#completed-languages).
 
 ## Dataset Structure
 
