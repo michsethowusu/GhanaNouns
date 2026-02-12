@@ -139,7 +139,6 @@ Use the frequency distributions to **bias subword tokenisation** or to create **
 │   ├── extract_np.py          # Noun phrase extraction
 │   ├── combine-all.py         # Merge, clean, filter adjectives
 │   ├── filter-non-english.py  # FastText language filtering
-│   └── compute_percentages.py # Add relative frequencies
 ├── README.md
 └── LICENSE
 ```
