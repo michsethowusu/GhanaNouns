@@ -1,7 +1,7 @@
 # GhanaNouns
 
 A lexicon of English noun phrases extracted from Ghanaian news and academic research.  
-Designed to improve Machine Translation (MT) quality of Ghanaian content to indigenous Ghanaian languages and to support synthetic data generation, human annotation, and other NLP applications in the Ghanaian context.
+The dataset provides a baseline vocabulary dataset for improving Machine Translation quality within the Ghanaian context.
 
 ---
 
