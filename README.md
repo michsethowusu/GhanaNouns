@@ -107,10 +107,6 @@ UTF‑8, comma‑separated, header row.
    - FastText `lid.176.bin`, confidence ≥ 0.7.  
    - Retained **58.3%** of phrases as English.
 
-5. **Percentage calculation** (`compute_percentages.py`)  
-   - Normalise frequencies per corpus.  
-   - Add source labels.
-
 ---
 
 ## 🚀 Usage Ideas
@@ -143,7 +139,6 @@ Use the frequency distributions to **bias subword tokenisation** or to create **
 │   ├── extract_np.py          # Noun phrase extraction
 │   ├── combine-all.py         # Merge, clean, filter adjectives
 │   ├── filter-non-english.py  # FastText language filtering
-│   └── compute_percentages.py # Add relative frequencies
 ├── README.md
 └── LICENSE
 ```
