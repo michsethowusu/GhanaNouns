@@ -107,10 +107,6 @@ UTF‑8, comma‑separated, header row.
    - FastText `lid.176.bin`, confidence ≥ 0.7.  
    - Retained **58.3%** of phrases as English.
 
-5. **Percentage calculation** (`compute_percentages.py`)  
-   - Normalise frequencies per corpus.  
-   - Add source labels.
-
 ---
 
 ## 🚀 Usage Ideas
