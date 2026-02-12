@@ -1,6 +1,6 @@
 # GhanaNouns
 
-A domain‑specific lexicon of English noun phrases extracted from Ghanaian news and academic research.  
+A lexicon of English noun phrases extracted from Ghanaian news and academic research.  
 Designed to improve Machine Translation (MT) quality for Ghanaian English and to support synthetic data generation, human annotation, and other NLP applications in the Ghanaian context.
 
 ---
