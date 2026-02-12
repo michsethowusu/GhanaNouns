@@ -8,7 +8,7 @@ Designed to improve Machine Translation (MT) quality for Ghanaian English and to
 ## Rationale
 
 Machine Translation systems often fail on region‑specific language varieties because they lack exposure to local vocabulary, collocations, and domains.  
-Ghanaian English—while mutually intelligible with other global Englishes—exhibits distinct preferences in word usage, institutional references, and cultural concepts.
+Ghanaian English—while mutually intelligible with global English—exhibits distinct preferences in word usage, institutional references, and cultural concepts.
 
 GhanaNouns, developed by Ghana NLP, addresses this gap by offering a high‑coverage, filtered set of noun phrases that appear naturally in Ghanaian news and academic writing.  
 Our primary objectives are:
