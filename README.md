@@ -1,6 +1,6 @@
 # GhanaNouns 🇬🇭📚
 
-**A Ghana NLP Resource** — A domain‑specific lexicon of English noun phrases extracted from Ghanaian news and academic research.  
+A Ghana NLP Resource — A domain‑specific lexicon of English noun phrases extracted from Ghanaian news and academic research.  
 Designed to improve Machine Translation (MT) quality for Ghanaian English and to support synthetic data generation, human annotation, and other NLP applications in the Ghanaian context.
 
 ---
@@ -13,11 +13,11 @@ Ghanaian English—while mutually intelligible with other global Englishes—exh
 GhanaNouns, developed by Ghana NLP, addresses this gap by offering a high‑coverage, filtered set of noun phrases that appear naturally in Ghanaian news and academic writing.  
 Our primary objectives are:
 
-- ✅ Provide a baseline English‑noun lexicon sourced exclusively from authentic Ghanaian texts.
-- ✅ Enable domain adaptation of MT models for Ghanaian English.
-- ✅ Facilitate synthetic data generation (e.g., back‑translation, term‑augmented training) via frequency‑weighted vocabulary lists.
-- ✅ Support human data collection (e.g., annotation, lexicon expansion) with a clean, deduplicated resource.
-- ✅ Serve as a reference corpus for contrastive linguistic studies of Ghanaian vs. international English.
+- Provide a baseline English‑noun lexicon sourced exclusively from authentic Ghanaian texts.
+- Enable domain adaptation of MT models for Ghanaian English.
+- Facilitate synthetic data generation (e.g., back‑translation, term‑augmented training) via frequency‑weighted vocabulary lists.
+- Support human data collection (e.g., annotation, lexicon expansion) with a clean, deduplicated resource.
+- Serve as a reference corpus for contrastive linguistic studies of Ghanaian vs. international English.
 
 By releasing this dataset openly, we aim to lower the barrier for developing NLP tools that work for and with Ghanaian users.
 
