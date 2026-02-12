@@ -23,6 +23,19 @@ By releasing this dataset openly, we aim to lower the barrier for developing NLP
 
 ---
 
+## 🙋 Contributors
+
+This project was a collaborative effort. We would like to thank the following volunteers who dedicated their time to creating the dataset:
+
+1. [Jonathan Ato Markin](https://www.linkedin.com/in/atomarkin/)
+2. [Emmanuel Saah](https://www.linkedin.com/in/emmanuel-saah/)
+3. [Gerhardt Datsomor](https://www.linkedin.com/in/gerhardt-datsomor/)
+4. [Kasuadana Sulemana Adams](https://www.linkedin.com/in/kasuadana1/)
+5. [Lucas Kpatah](https://www.linkedin.com/in/lucas-kpatah-351086376/)
+6. [Mich-Seth Owusu](https://www.linkedin.com/in/mich-seth-owusu/)
+
+---
+
 ## 📊 Dataset Overview
 
 | Metric                     | Value      |
@@ -139,7 +152,7 @@ Use the frequency distributions to **bias subword tokenisation** or to create **
 
 ## 🏛️ About Ghana NLP
 
-**Ghana NLP** is an open‑source community initiative focused on building natural language processing resources and tools for the languages of Ghana.  
+Ghana NLP is an open‑source community initiative focused on building natural language processing resources and tools for the languages of Ghana.  
 We develop datasets, models, and software to promote research and applications in Ghanaian languages and Ghanaian English.  
 Our work is entirely volunteer‑driven and publicly released under open licenses.
 
@@ -177,7 +190,7 @@ You are free to share and adapt the material for any purpose, even commercially,
 
 ---
 
-## 🙋 Contact & Contributions
+## 🙋 Contact
 
 We welcome contributions, bug reports, and suggestions via [GitHub Issues](https://github.com/ghananlp/GhanaNouns/issues).  
 For general inquiries: **info@ghananlp.org**  
