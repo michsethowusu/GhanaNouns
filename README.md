@@ -10,16 +10,16 @@ Designed to improve Machine Translation (MT) quality for Ghanaian English and to
 Machine Translation systems often fail on region‑specific language varieties because they lack exposure to local vocabulary, collocations, and domains.  
 Ghanaian English—while mutually intelligible with other global Englishes—exhibits distinct preferences in word usage, institutional references, and cultural concepts.
 
-**GhanaNouns**, developed by **Ghana NLP**, addresses this gap by offering a **high‑coverage, filtered set of noun phrases** that appear naturally in Ghanaian news and academic writing.  
+GhanaNouns, developed by Ghana NLP, addresses this gap by offering a high‑coverage, filtered set of noun phrases that appear naturally in Ghanaian news and academic writing.  
 Our primary objectives are:
 
-- ✅ Provide a **baseline English‑noun lexicon** sourced exclusively from authentic Ghanaian texts.
-- ✅ Enable **domain adaptation** of MT models for Ghanaian English.
-- ✅ Facilitate **synthetic data generation** (e.g., back‑translation, term‑augmented training) via frequency‑weighted vocabulary lists.
-- ✅ Support **human data collection** (e.g., annotation, lexicon expansion) with a clean, deduplicated resource.
-- ✅ Serve as a **reference corpus** for contrastive linguistic studies of Ghanaian vs. international English.
+- ✅ Provide a baseline English‑noun lexicon sourced exclusively from authentic Ghanaian texts.
+- ✅ Enable domain adaptation of MT models for Ghanaian English.
+- ✅ Facilitate synthetic data generation (e.g., back‑translation, term‑augmented training) via frequency‑weighted vocabulary lists.
+- ✅ Support human data collection (e.g., annotation, lexicon expansion) with a clean, deduplicated resource.
+- ✅ Serve as a reference corpus for contrastive linguistic studies of Ghanaian vs. international English.
 
-By releasing this dataset openly, we aim to **lower the barrier for developing NLP tools that work for and with Ghanaian users**.
+By releasing this dataset openly, we aim to lower the barrier for developing NLP tools that work for and with Ghanaian users.
 
 ---
 
