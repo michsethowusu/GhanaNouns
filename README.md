@@ -1,6 +1,6 @@
 # GhanaNouns
 
-A lexicon of English noun phrases extracted from Ghanaian news and academic research.  
+A lexicon of English noun phrases extracted from Ghanaian news, academic research, and speech data.  
 The dataset provides a baseline vocabulary dataset for improving Machine Translation quality within the Ghanaian context.
 
 ---
@@ -10,7 +10,7 @@ The dataset provides a baseline vocabulary dataset for improving Machine Transla
 Machine Translation systems often fail on region‑specific language varieties because they lack exposure to local vocabulary, collocations, and domains.  
 Ghanaian English—while mutually intelligible with global English—exhibits distinct preferences in word usage, institutional references, and cultural concepts.
 
-GhanaNouns, developed by Ghana NLP, addresses this gap by offering a high‑coverage, filtered set of noun phrases that appear naturally in Ghanaian news and academic writing.  
+GhanaNouns, developed by Ghana NLP, addresses this gap by offering a high‑coverage, filtered set of noun phrases that appear naturally in Ghanaian news, academic writing, and speech.  
 Our primary objectives are:
 
 - Provide a baseline English‑noun lexicon sourced exclusively from authentic Ghanaian texts.
@@ -38,15 +38,19 @@ This project was a collaborative effort. We would like to thank the following vo
 
 ## 📊 Dataset Overview
 
-| Metric                     | Value      |
-|----------------------------|------------|
-| Total unique noun phrases  | **696,732**|
-| … from both sources        | 109,369    |
-| … exclusively in news      | 423,760    |
-| … exclusively in research  | 661,876    |
-| Language‑filtered          | FastText (lid.176, ≥0.7) |
-| Minimum phrase length      | 1 word      |
-| Maximum phrase length      | 6+ words    |
+| Metric                             | Value      |
+|------------------------------------|------------|
+| Total unique noun phrases          | **806,317**|
+| … from news, research & speech     | 43,345     |
+| … from news & research only        | 66,024     |
+| … from news & speech only          | 28,226     |
+| … from research & speech only      | 10,990     |
+| … exclusively in news              | 395,534    |
+| … exclusively in research          | 650,886    |
+| … exclusively in speech            | 221,714    |
+| Language‑filtered                  | FastText (lid.176, ≥0.7) |
+| Minimum phrase length              | 1 word     |
+| Maximum phrase length              | 6+ words   |
 
 All phrases are **lowercased** and stripped of leading stopwords.  
 Proper nouns, acronyms, and non‑alphabetic tokens are **removed** during extraction.
@@ -55,14 +59,22 @@ Proper nouns, acronyms, and non‑alphabetic tokens are **removed** during extra
 
 ## 🔍 Sample Data
 
-| phrase        | news_count | research_count | news_%   | research_% | avg_%   | source   |
-|---------------|------------|----------------|----------|------------|---------|----------|
-| study         | 4,175      | 227,243        | 0.0359   | 2.0910     | 1.0634  | both     |
-| people        | 109,037    | 50,895         | 0.9375   | 0.4683     | 0.7029  | both     |
-| government    | 110,414    | 13,981         | 0.9493   | 0.1286     | 0.5390  | both     |
-| research      | 7,186      | 52,838         | 0.0618   | 0.4862     | 0.2740  | both     |
-| work          | 25,582     | 34,592         | 0.2199   | 0.3183     | 0.2691  | both     |
-| …             | …          | …              | …        | …          | …       | …        |
+| phrase     | news_count | research_count | speech_count | news_%  | research_% | speech_% | avg_%  | source               |
+|------------|------------|----------------|--------------|---------|------------|----------|--------|----------------------|
+| people     | 109,037    | 50,895         | 145,181      | 0.9375  | 0.4683     | 2.3585   | 1.2548 | news_research_speech |
+| government | 110,414    | 13,981         | 66,410       | 0.9493  | 0.1286     | 1.0788   | 0.7189 | news_research_speech |
+| study      | 4,175      | 227,243        | 559          | 0.0359  | 2.0910     | 0.0091   | 0.7120 | news_research_speech |
+| things     | 22,866     | 6,708          | 61,456       | 0.1966  | 0.0617     | 0.9984   | 0.4189 | news_research_speech |
+| lot        | 19,615     | 8,939          | 45,384       | 0.1686  | 0.0823     | 0.7373   | 0.3294 | news_research_speech |
+| money      | 29,007     | 13,381         | 34,107       | 0.2494  | 0.1231     | 0.5541   | 0.3089 | news_research_speech |
+| president  | 19,220     | 370            | 46,600       | 0.1652  | 0.0034     | 0.7570   | 0.3085 | news_research_speech |
+| place      | 32,504     | 17,320         | 25,863       | 0.2795  | 0.1594     | 0.4201   | 0.2863 | news_research_speech |
+| work       | 25,582     | 34,592         | 17,722       | 0.2199  | 0.3183     | 0.2879   | 0.2754 | news_research_speech |
+| terms      | 10,825     | 21,156         | 26,812       | 0.0931  | 0.1947     | 0.4356   | 0.2411 | news_research_speech |
+| person     | 17,642     | 9,679          | 28,029       | 0.1517  | 0.0891     | 0.4553   | 0.2320 | news_research_speech |
+| law        | 25,990     | 3,630          | 25,627       | 0.2235  | 0.0334     | 0.4163   | 0.2244 | news_research_speech |
+| party      | 30,833     | 1,762          | 22,335       | 0.2651  | 0.0162     | 0.3628   | 0.2147 | news_research_speech |
+| …          | …          | …              | …            | …       | …          | …        | …      | …                    |
 
 *Percentages are normalised within each source corpus.*
 
@@ -78,10 +90,12 @@ UTF‑8, comma‑separated, header row.
 | `phrase`              | Lowercased noun phrase |
 | `news_count`          | Raw frequency in the news corpus |
 | `research_count`      | Raw frequency in the research corpus |
+| `speech_count`        | Raw frequency in the speech corpus |
 | `news_percentage`     | Relative frequency within news noun‑phrase tokens (×100) |
-| `research_percentage` | Relative frequency within research noun‑phrase tokens |
-| `average_percentage`  | Arithmetic mean of the two percentages |
-| `source`              | `both`, `news`, or `research` |
+| `research_percentage` | Relative frequency within research noun‑phrase tokens (×100) |
+| `speech_percentage`   | Relative frequency within speech noun‑phrase tokens (×100) |
+| `average_percentage`  | Arithmetic mean of the available source percentages |
+| `source`              | Combination of one or more of: `news`, `research`, `speech` |
 
 ---
 
@@ -89,7 +103,8 @@ UTF‑8, comma‑separated, header row.
 
 1. **Sentence collection**  
    - 2.3M sentences from Ghanaian online news (2018–2024).  
-   - 2.7M sentences from Ghana‑focused academic publications.
+   - 2.7M sentences from Ghana‑focused academic publications.  
+   - Additional sentences from Ghanaian speech data.
 
 2. **Noun phrase extraction** (`extract_np.py`)  
    - spaCy `en_core_web_sm`, GPU accelerated.  
@@ -101,11 +116,11 @@ UTF‑8, comma‑separated, header row.
    - Remove non‑alphabetic characters.  
    - Remove all‑caps / multi‑capitalised tokens.  
    - Filter out adjectives (POS tagging).  
-   - Merge news & research counts.
+   - Merge news, research & speech counts.
 
 4. **Language identification** (`filter-non-english.py`)  
    - FastText `lid.176.bin`, confidence ≥ 0.7.  
-   - Retained **58.3%** of phrases as English.
+   - Retained **56.9%** of phrases as English.
 
 ---
 
@@ -124,7 +139,7 @@ Use the frequency distributions to **bias subword tokenisation** or to create **
 - **Lexical resource expansion**: Crowdsource synonyms or regional variants based on the core list.
 
 ### • Linguistic analysis  
-- Compare relative frequencies of common nouns between news and academic registers.  
+- Compare relative frequencies of common nouns across news, academic, and speech registers.  
 - Identify terms that are **overrepresented** in Ghanaian English compared to general corpora (e.g., COCA, BNC).
 
 ---
@@ -190,7 +205,7 @@ You are free to share and adapt the material for any purpose, even commercially,
 We welcome contributions, bug reports, and suggestions via [GitHub Issues](https://github.com/ghananlp/GhanaNouns/issues).  
 For general inquiries: **info@ghananlp.org**  
 
-If you extend the dataset or apply it in an interesting way, please let us know—we’d love to feature your work!
+If you extend the dataset or apply it in an interesting way, please let us know—we'd love to feature your work!
 
 ---
 
