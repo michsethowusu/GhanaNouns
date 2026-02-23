@@ -12,8 +12,8 @@ client = OpenAI(
 )
 
 # ─── CONFIGURATION ────────────────────────────────────────────────────────────
-INPUT_FILE  = "/home/owusus/Documents/GitHub/GhanaNouns/data/ghana-nouns.csv"           # ← change this
-OUTPUT_FILE = "/home/owusus/Documents/GitHub/GhanaNouns/data/ghana-nouns_classified.csv"  # ← change this
+INPUT_FILE  = "/home/owusus/Documents/GitHub/GhanaNouns/data/ghana-nouns.csv"
+OUTPUT_FILE = "/home/owusus/Documents/GitHub/GhanaNouns/data/ghana-nouns_classified.csv"
 PHRASE_COLUMN = "phrase"   # Set to column name string, or None to auto-detect (first column)
 BATCH_SIZE = 100
 SLEEP_BETWEEN_BATCHES = 2   # seconds
@@ -23,14 +23,14 @@ TOPICS = [
     "Agriculture and Food Production",
     "Healthcare and Wellbeing",
     "General",
-    "None of the above",
+    "Other",
 ]
 
 TOPIC_KEYS = [
     "agriculture_and_food_production",
     "healthcare_and_wellbeing",
     "general",
-    "none_of_the_above",
+    "other",
 ]
 
 # Map display names → column keys
@@ -43,20 +43,20 @@ Topics:
 - Agriculture and Food Production  (farming, crops, livestock, food systems, soil, irrigation, harvest, agribusiness, food security, nutrition, diet, food processing)
 - Healthcare and Wellbeing  (medicine, disease, mental health, hospitals, drugs, vaccines, fitness, public health, patient care, medical research, wellness)
 - General  (broad societal, economic, political, technological, cultural, or educational topics that don't fit the above)
-- None of the above  (proper nouns with no clear topical meaning, highly ambiguous fragments, or junk phrases)
+- Other  (proper nouns with no clear topical meaning, highly ambiguous fragments, or junk phrases)
 
 Rules:
 1. A phrase CAN belong to multiple topics.
-2. Use "None of the above" ONLY when genuinely unclassifiable or meaningless.
+2. Use "Other" ONLY when genuinely unclassifiable or meaningless.
 3. Output ONLY the XML block below — no explanation, no extra text.
 4. There must be EXACTLY {n} <item> blocks, one per phrase, in the same order.
 5. Each <item> uses id= matching the phrase number, and exactly these 4 child tags with values 1 (true) or 0 (false):
-   <agri>, <health>, <general>, <none>
+   <agri>, <health>, <general>, <other>
 
 Example for 2 phrases:
 <results>
-  <item id="1"><agri>1</agri><health>0</health><general>0</general><none>0</none></item>
-  <item id="2"><agri>0</agri><health>1</health><general>1</general><none>0</none></item>
+  <item id="1"><agri>1</agri><health>0</health><general>0</general><other>0</other></item>
+  <item id="2"><agri>0</agri><health>1</health><general>1</general><other>0</other></item>
 </results>
 
 Phrases to classify:
@@ -79,11 +79,7 @@ def _parse_results(response_text: str, expected: int) -> list[dict] | None:
     """
     Parse XML response into a list of normalised dicts.
     Returns None if the item count doesn't match expected.
-
-    Parsing is tag-based (not position-based), so extra whitespace,
-    comments, or reordered attributes don't break it.
     """
-    # Extract all <item ...>...</item> blocks
     items = re.findall(r'<item[^>]*>(.*?)</item>', response_text, re.DOTALL)
 
     if len(items) != expected:
@@ -99,7 +95,7 @@ def _parse_results(response_text: str, expected: int) -> list[dict] | None:
             "agriculture_and_food_production": extract(block, "agri"),
             "healthcare_and_wellbeing":        extract(block, "health"),
             "general":                         extract(block, "general"),
-            "none_of_the_above":               extract(block, "none"),
+            "other":                           extract(block, "other"),
         })
     return results
 
@@ -124,26 +120,21 @@ def classify_batch(phrases: list[str], max_retries: int = 2) -> list[dict]:
     Self-healing strategy:
       1. Try the full batch (up to max_retries times).
       2. If the count still doesn't match after retries, split into two halves
-         and recurse — this isolates whichever half is confusing the model.
+         and recurse.
       3. If a batch reaches size 1 and still fails, classify that single phrase
          with a dedicated single-item call (_classify_one).
-
-    This guarantees len(output) == len(input) with real classifications,
-    never silent padding with False.
     """
     n = len(phrases)
 
     if n == 0:
         return []
 
-    # ── Single-phrase fast path ───────────────────────────────────────────────
     if n == 1:
         return [_classify_one(phrases[0])]
 
     phrases_text = "\n".join([f"{i+1}. {p}" for i, p in enumerate(phrases)])
     prompt = CLASSIFY_PROMPT.format(n=n, phrases_text=phrases_text)
 
-    # ── Retry loop ────────────────────────────────────────────────────────────
     for attempt in range(1, max_retries + 1):
         try:
             text = _call_api(prompt)
@@ -156,7 +147,6 @@ def classify_batch(phrases: list[str], max_retries: int = 2) -> list[dict]:
         if attempt < max_retries:
             time.sleep(1)
 
-    # ── Divide-and-conquer fallback ───────────────────────────────────────────
     mid = n // 2
     print(f"  ↪ Splitting batch of {n} → [{mid}, {n - mid}] for independent retry")
     left  = classify_batch(phrases[:mid],  max_retries)
@@ -169,6 +159,25 @@ def format_duration(seconds: float) -> str:
     m = int((seconds % 3600) // 60)
     s = int(seconds % 60)
     return f"{h:02d}:{m:02d}:{s:02d}"
+
+
+def is_validly_classified(row: pd.Series) -> bool:
+    """
+    A row is considered validly classified if:
+      - All topic columns are non-null, AND
+      - At least one topic column is True (1)
+        (a row where everything is False is valid only if 'other' is True,
+         meaning the model explicitly said it belongs to no topic)
+    This rejects rows that were written as all-NaN or all-False due to
+    a suspended/interrupted run where no real API response was received.
+    """
+    vals = {k: row[k] for k in TOPIC_KEYS}
+    # Must all be non-null
+    if any(pd.isna(v) for v in vals.values()):
+        return False
+    # Must have at least one True — all-False means nothing was assigned,
+    # which indicates a failed/empty API response, not a real classification
+    return any(bool(v) for v in vals.values())
 
 
 def main():
@@ -188,7 +197,7 @@ def main():
     # ── Add topic columns if missing ─────────────────────────────────────────
     for col in TOPIC_KEYS:
         if col not in df.columns:
-            df[col] = pd.NA   # nullable — NA means not yet processed
+            df[col] = pd.NA
 
     # ── Resume logic ─────────────────────────────────────────────────────────
     start_idx = 0
@@ -196,11 +205,30 @@ def main():
         print(f"\nFound existing output file — resuming…")
         existing = pd.read_csv(OUTPUT_FILE, low_memory=False)
         if all(k in existing.columns for k in TOPIC_KEYS):
-            # Count rows where ALL topic columns are non-null (i.e. processed)
-            processed_mask = existing[TOPIC_KEYS].notna().all(axis=1)
-            start_idx = int(processed_mask.sum())
-            df = existing
-            print(f"Already processed: {start_idx:,} rows — resuming from index {start_idx}")
+            n_existing = len(existing)
+            print(f"Existing output has {n_existing:,} rows — merging back into full dataframe…")
+            for col in TOPIC_KEYS:
+                df.loc[:n_existing - 1, col] = existing[col].values
+
+            # ── KEY FIX: only count rows that are VALIDLY classified ──────────
+            # Rows written during a suspended run may exist but have all-NaN or
+            # all-False topic columns, meaning no real classification happened.
+            # We scan from the top and stop at the first invalid row to find
+            # the true resume point (assumes valid rows are a contiguous prefix).
+            valid_count = 0
+            for idx in range(n_existing):
+                if is_validly_classified(df.loc[idx]):
+                    valid_count += 1
+                else:
+                    # First bad row — everything from here onward needs reprocessing
+                    print(f"  ⚠ Row {idx} has empty/invalid classifications — "
+                          f"will reprocess from here")
+                    # Clear the bad rows so they don't confuse later logic
+                    df.loc[idx:n_existing - 1, TOPIC_KEYS] = pd.NA
+                    break
+
+            start_idx = valid_count
+            print(f"Validly classified: {start_idx:,} rows — resuming from index {start_idx}")
         else:
             print("Topic columns missing in existing file — starting fresh")
     else:
@@ -237,13 +265,12 @@ def main():
         avg      = elapsed / (batch_num + 1)
         eta      = avg * (total_batches - batch_num - 1)
 
-        # Quick summary of this batch's results
         batch_df = df.loc[batch_start : batch_end - 1, TOPIC_KEYS]
         counts   = {k: int(batch_df[k].sum()) for k in TOPIC_KEYS}
         print(f"  ✓ agri={counts['agriculture_and_food_production']}  "
               f"health={counts['healthcare_and_wellbeing']}  "
               f"general={counts['general']}  "
-              f"none={counts['none_of_the_above']}")
+              f"other={counts['other']}")
         print(f"  ✓ Elapsed: {format_duration(elapsed)} | ETA: {format_duration(eta)} | Avg: {avg:.1f}s/batch")
 
         if batch_num < total_batches - 1:
