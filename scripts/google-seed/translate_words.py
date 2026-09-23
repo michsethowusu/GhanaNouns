@@ -41,6 +41,18 @@ WORDS_PER_REQUEST = 20
 # Google's code -> the code SHOLA stores. Checked against afriso: every one of
 # these resolves to a language SHOLA lists, and every one was confirmed to
 # actually translate rather than hand the English back.
+#
+# `ber` is the odd one. It is ISO 639-2/5's *collective* code for the whole
+# Berber family, so it names no single language and cannot map to itself.
+# Google labels it "Tamazight (Tifinagh)" and every character it returns is
+# Tifinagh - 46 of 46 letters across a test of eight words. That is Standard
+# Moroccan Tamazight, `zgh`: the standardised variety that has been official in
+# Morocco since 2011 and is written in Tifinagh by design.
+#
+# The alternatives fit worse. Kabyle (`kab`) is written overwhelmingly in Latin
+# script, which the output rules out. Tachelhit (`shi`) and Central Atlas
+# Tamazight (`tzm`) are specific regional varieties, and filing standardised
+# output under one of them would tell a speaker it is something it is not.
 LANGUAGES = {
     "ach": "ach", "aa": "aar", "af": "afr", "alz": "alz", "am": "amh",
     "ak": "twi", "bm": "bam", "bci": "bci", "bem": "bem", "ny": "nya",
@@ -52,7 +64,7 @@ LANGUAGES = {
     "sg": "sag", "crs": "crs", "sn": "sna", "so": "som", "nr": "nbl",
     "st": "sot", "sus": "sus", "sw": "swa", "ss": "ssw", "ti": "tir",
     "tiv": "tiv", "ts": "tso", "tn": "tsn", "tum": "tum", "ve": "ven",
-    "wo": "wol", "xh": "xho", "yo": "yor", "zu": "zul",
+    "wo": "wol", "xh": "xho", "yo": "yor", "zu": "zul", "ber": "zgh",
 }
 
 lock = threading.Lock()
