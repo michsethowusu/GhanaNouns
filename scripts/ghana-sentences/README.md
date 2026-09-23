@@ -8,7 +8,10 @@ we decide here.
 | --- | --- | --- |
 | `gemini_leg.py` | all 12 subsets | `gemini-3.6-flash`, batched 12 sentences per call |
 | `google_leg.py` | Twi, Ewe, Ga | Google Translate free endpoint, source → English |
-| `google_leg.py` | Twi, Ewe, Ga | the same endpoint, source → Thai → English |
+
+A third leg pivoted through Thai. Speakers liked it least — 25% picked against
+Gemini's 63%, and 1–5 head to head against the direct pass — so it is gone. See
+`data/ghana-sentences/RESULTS.md`.
 
 ## The two Twi varieties
 
@@ -22,10 +25,9 @@ told which variety it is reading. Google Translate has only `ak`, so both are
 sent as `ak` and the two varieties get the same Google candidates — the
 distinction there is in who evaluates them, not in what was proposed.
 
-The Thai pass-through is there because it fails differently. Where the direct
-translation quietly guesses, the pivot usually guesses something else, and two
-disagreeing candidates are more useful to a speaker than one confident wrong
-answer.
+The idea behind the pivot was that it would fail differently from the direct
+pass, so a speaker would have something worth choosing between. It did fail
+differently. It was also wrong more often, which is the part that mattered.
 
 ## Running
 

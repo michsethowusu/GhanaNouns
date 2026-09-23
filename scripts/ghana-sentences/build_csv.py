@@ -14,7 +14,6 @@ import pandas as pd
 SCR = os.environ.get("SCR", "work")
 GEMINI = "gemini-3.6-flash"
 DIRECT = "google-translate"
-PIVOT = "google-translate-via-thai"
 
 # Which SHOLA language code each subset's speakers are.
 CODE = {"ada": "ada", "dag": "dagbani", "dga": "dga", "ewe": "ewe",
@@ -91,7 +90,7 @@ def same(a, b):
 def main():
     df = pd.read_parquet(f"{SCR}/gs/all.parquet")
     gem = load(f"{SCR}/out/gemini.jsonl", ["en"])
-    goo = load(f"{SCR}/out/google.jsonl", ["direct", "pivot"])
+    goo = load(f"{SCR}/out/google.jsonl", ["direct"])
 
     dropped = exclusions(df)
 
@@ -117,8 +116,7 @@ def main():
             # them, in the order the systems are worth showing.
             candidates = []
             for name, value in ((GEMINI, gem.get(uid, {}).get("en", "")),
-                                (DIRECT, goo.get(uid, {}).get("direct", "")),
-                                (PIVOT, goo.get(uid, {}).get("pivot", ""))):
+                                (DIRECT, goo.get(uid, {}).get("direct", ""))):
                 value = value.strip()
                 # A "translation" identical to the input is the endpoint giving
                 # up, not an answer.

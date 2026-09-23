@@ -1,8 +1,13 @@
-"""Google Translate free endpoint legs for Twi, Ewe and Ga.
+"""Google Translate free endpoint leg for Twi, Ewe and Ga.
 
-Two translations per sentence:
-  direct  source -> English
-  pivot   source -> Thai -> English
+One translation per sentence: source -> English.
+
+There was a second, pivoted through Thai on the theory that it would fail
+differently and so give a speaker something worth choosing between. It did fail
+differently, and speakers picked it least: 25% against Gemini's 63%, and 1-5
+against the direct pass on the items where the two disagreed. Twenty answers is
+thin evidence, but thin evidence against a leg that triples the request count
+and proposes the worst English is enough.
 
 Resumable: appends to out/google.jsonl keyed by "<config>:<index>".
 """
@@ -95,17 +100,12 @@ def run_batch(job):
     texts = [t for _, t in chunk]
     try:
         direct = translate(texts, sl, "en")
-        time.sleep(0.4)
-        thai = translate(texts, sl, "th")
-        time.sleep(0.4)
-        pivot = translate(thai, "th", "en")
     except Exception as e:
         sys.stderr.write(f"batch {config} failed: {e}\n")
         return
     lines = [json.dumps({"uid": f"{config}:{i}", "config": config, "text": t,
-                         "direct": d, "thai": th, "pivot": p},
-                        ensure_ascii=False)
-             for (i, t), d, th, p in zip(chunk, direct, thai, pivot)]
+                         "direct": d}, ensure_ascii=False)
+             for (i, t), d in zip(chunk, direct)]
     with lock:
         with open(OUT, "a", encoding="utf-8") as fh:
             fh.write("\n".join(lines) + "\n")
