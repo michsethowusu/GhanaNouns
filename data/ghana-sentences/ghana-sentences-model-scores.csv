@@ -1,0 +1,4 @@
+model,offered,picked,rate,sole
+gemini-3.6-flash,19,12,0.6316,10
+google-translate,19,8,0.4211,3
+google-translate-via-thai,20,5,0.25,2
